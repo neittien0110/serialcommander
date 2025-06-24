@@ -7,7 +7,9 @@ export const SerialProvider = ({ children }) => {
   const [output, setOutput] = useState("");
   const [receivedData, setReceivedData] = useState("");
   const portRef = useRef(null);
-  const writerRef = useRef(null); // lưu writer toàn cục
+  const writerRef = useRef(null);
+  const readerRef = useRef(null); // ⚠️ lưu reader duy nhất
+  const decoderRef = useRef(null); // ⚠️ lưu decoder để không pipeTo nhiều lần
 
   const connectToSerial = async () => {
     if (!("serial" in navigator)) {
@@ -22,24 +24,48 @@ export const SerialProvider = ({ children }) => {
       portRef.current = selectedPort;
       setPort(selectedPort);
 
-      // ✅ Khởi tạo TextEncoder và writer một lần
+      // ✅ chỉ pipeTo 1 lần
       const encoder = new TextEncoderStream();
       encoder.readable.pipeTo(selectedPort.writable);
       writerRef.current = encoder.writable.getWriter();
 
+      const decoder = new TextDecoderStream();
+      decoderRef.current = decoder;
+      selectedPort.readable.pipeTo(decoder.writable);
+      const reader = decoder.readable.getReader();
+      readerRef.current = reader;
+
       alert("Đã kết nối thiết bị.");
-      await readData(selectedPort);
+
+      // Bắt đầu đọc liên tục
+      readLoop(reader);
     } catch (error) {
       console.error("Kết nối serial thất bại:", error);
       alert("Không thể kết nối đến thiết bị.");
     }
   };
 
+  const readLoop = async (reader) => {
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) {
+          setReceivedData(value);
+          setOutput((prev) => prev + "\n" + value);
+        }
+      }
+    } catch (err) {
+      console.warn("Đã dừng đọc:", err);
+    } finally {
+      reader.releaseLock();
+    }
+  };
+
   const sendData = async (dataMap) => {
-    const currentPort = portRef.current;
     const writer = writerRef.current;
 
-    if (!currentPort || !writer) {
+    if (!portRef.current || !writer) {
       alert("Thiết bị chưa được kết nối.");
       return "";
     }
@@ -50,29 +76,8 @@ export const SerialProvider = ({ children }) => {
       }
     }
 
-    return await readData(currentPort);
-  };
-
-  const readData = async (port) => {
-    const decoder = new TextDecoderStream();
-    const readableStreamClosed = port.readable.pipeTo(decoder.writable);
-    const reader = decoder.readable.getReader();
-    let data = "";
-
-    try {
-      const { value } = await reader.read();
-      if (value) {
-        data += value;
-        setReceivedData(data);
-        setOutput((prev) => prev + "\n" + data);
-      }
-      return data;
-    } catch (error) {
-      console.error("Lỗi khi đọc từ thiết bị:", error);
-      return "";
-    } finally {
-      reader.releaseLock();
-    }
+    // ❌ không gọi read lại nữa — đã có vòng `readLoop` rồi
+    return receivedData;
   };
 
   return (
