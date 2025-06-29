@@ -219,7 +219,12 @@ function DeviceSetting() {
             />
           </>
         )}
-        <button onClick={connectToSerial}>Kết nối thiết bị</button>
+        <button
+          onClick={() => connectToSerial(config?.baudrate || 115200)}
+        >
+          Kết nối thiết bị
+        </button>
+
         <button onClick={handleSendAll}>Gửi toàn bộ cấu hình</button>
       </div>
 

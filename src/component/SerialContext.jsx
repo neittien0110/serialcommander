@@ -11,7 +11,7 @@ export const SerialProvider = ({ children }) => {
   const readerRef = useRef(null); // ⚠️ lưu reader duy nhất
   const decoderRef = useRef(null); // ⚠️ lưu decoder để không pipeTo nhiều lần
 
-  const connectToSerial = async () => {
+  const connectToSerial = async (baudrate = 115200) => {
     if (!("serial" in navigator)) {
       alert("Trình duyệt không hỗ trợ Web Serial API.");
       return;
@@ -19,7 +19,11 @@ export const SerialProvider = ({ children }) => {
 
     try {
       const selectedPort = await navigator.serial.requestPort();
-      await selectedPort.open({ baudRate: 115200 });
+
+      // parse baudrate (chuỗi sang số) và fallback 115200
+      const parsedBaudrate = parseInt(baudrate) || 115200;
+
+      await selectedPort.open({ baudRate: parsedBaudrate });
 
       portRef.current = selectedPort;
       setPort(selectedPort);
@@ -35,7 +39,7 @@ export const SerialProvider = ({ children }) => {
       const reader = decoder.readable.getReader();
       readerRef.current = reader;
 
-      alert("Đã kết nối thiết bị.");
+      alert(`Đã kết nối thiết bị với baudrate ${parsedBaudrate}`);
 
       // Bắt đầu đọc liên tục
       readLoop(reader);
@@ -44,7 +48,6 @@ export const SerialProvider = ({ children }) => {
       alert("Không thể kết nối đến thiết bị.");
     }
   };
-
   const readLoop = async (reader) => {
     try {
       while (true) {
