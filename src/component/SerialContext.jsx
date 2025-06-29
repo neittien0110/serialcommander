@@ -73,11 +73,12 @@ export const SerialProvider = ({ children }) => {
       return "";
     }
 
-    for (const [key, value] of Object.entries(dataMap)) {
+    for (const [, value] of Object.entries(dataMap)) {
       if (value && value.toString().trim() !== "") {
-        await writer.write(`${key}=${value}\n`);
+        await writer.write(`${value}\n`);
       }
     }
+
 
     // ❌ không gọi read lại nữa — đã có vòng `readLoop` rồi
     return receivedData;
