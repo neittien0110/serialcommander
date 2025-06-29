@@ -42,7 +42,11 @@ function DeviceSetting() {
       loadConfigById(selectedConfigId);
     }
   }, [selectedConfigId]);
-
+  useEffect(() => {
+    if (isGuest) {
+      setSelectedConfigId("000000");
+    }
+  }, [isGuest]);
 
   const loadConfigById = async (idOrCode) => {
     try {
