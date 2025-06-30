@@ -83,12 +83,28 @@ export const SerialProvider = ({ children }) => {
     // ❌ không gọi read lại nữa — đã có vòng `readLoop` rồi
     return receivedData;
   };
+  const disconnect = async () => {
+    try {
+      const currentPort = portRef.current;
+      if (currentPort && currentPort.readable) {
+        await currentPort.close();
+        portRef.current = null;
+        setPort(null);
+        alert("Đã đóng kết nối thiết bị.");
+      }
+    } catch (error) {
+      console.error("Đóng kết nối thất bại:", error);
+      alert("Lỗi khi đóng kết nối.");
+    }
+  };
+
 
   return (
     <SerialContext.Provider
       value={{
         connectToSerial,
         sendData,
+        disconnect,
         receivedData,
         output,
         port,

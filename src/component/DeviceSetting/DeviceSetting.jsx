@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import "./DeviceSetting.css";
 
 function DeviceSetting() {
-  const { connectToSerial, sendData, output } = React.useContext(SerialContext);
+  const { connectToSerial, sendData, output, disconnect } = React.useContext(SerialContext);
 
   const [configs, setConfigs] = useState([]);
   const [selectedConfigId, setSelectedConfigId] = useState(null);
@@ -162,6 +162,25 @@ function DeviceSetting() {
     alert("Share Code: " + data.shareCode);
   };
 
+  const handleDeleteConfig = async () => {
+    if (!selectedConfigId) return;
+    if (!window.confirm("Bạn chắc chắn muốn xoá cấu hình này?")) return;
+    try {
+      const res = await fetch(`https://be-datn-mc6y.onrender.com/configs/${selectedConfigId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Xoá thất bại");
+      alert("Xoá thành công!");
+      window.location.reload();
+    } catch (err) {
+      alert("Lỗi khi xoá cấu hình: " + err.message);
+    }
+  };
+
   const handleLogin = () => {
     navigate("/login");
   };
@@ -224,7 +243,10 @@ function DeviceSetting() {
         >
           Kết nối thiết bị
         </button>
-
+        <button onClick={disconnect}>Đóng kết nối</button>
+        {!isGuest && (
+          <button onClick={handleDeleteConfig}>Xoá cấu hình</button>
+        )}
         <button onClick={handleSendAll}>Gửi toàn bộ cấu hình</button>
       </div>
 
