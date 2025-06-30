@@ -7,97 +7,86 @@ export const SerialProvider = ({ children }) => {
   const [output, setOutput] = useState("");
   const [receivedData, setReceivedData] = useState("");
   const portRef = useRef(null);
+  const readerRef = useRef(null);
   const writerRef = useRef(null);
-  const readerRef = useRef(null); // ⚠️ lưu reader duy nhất
-  const decoderRef = useRef(null); // ⚠️ lưu decoder để không pipeTo nhiều lần
 
   const connectToSerial = async (baudrate = 115200) => {
     if (!("serial" in navigator)) {
       alert("Trình duyệt không hỗ trợ Web Serial API.");
       return;
     }
-
     try {
       const selectedPort = await navigator.serial.requestPort();
-
-      // parse baudrate (chuỗi sang số) và fallback 115200
-      const parsedBaudrate = parseInt(baudrate) || 115200;
-
-      await selectedPort.open({ baudRate: parsedBaudrate });
-
+      await selectedPort.open({ baudRate: parseInt(baudrate) || 115200 });
       portRef.current = selectedPort;
       setPort(selectedPort);
 
-      // ✅ chỉ pipeTo 1 lần
-      const encoder = new TextEncoderStream();
-      encoder.readable.pipeTo(selectedPort.writable);
-      writerRef.current = encoder.writable.getWriter();
+      writerRef.current = selectedPort.writable.getWriter();
+      readerRef.current = selectedPort.readable.getReader();
 
-      const decoder = new TextDecoderStream();
-      decoderRef.current = decoder;
-      selectedPort.readable.pipeTo(decoder.writable);
-      const reader = decoder.readable.getReader();
-      readerRef.current = reader;
-
-      alert(`Đã kết nối thiết bị với baudrate ${parsedBaudrate}`);
-
-      // Bắt đầu đọc liên tục
-      readLoop(reader);
+      alert(`Kết nối thiết bị baudrate ${baudrate} thành công`);
+      readLoop();
     } catch (error) {
       console.error("Kết nối serial thất bại:", error);
-      alert("Không thể kết nối đến thiết bị.");
+      alert("Không thể kết nối thiết bị.");
     }
   };
-  const readLoop = async (reader) => {
+
+  const readLoop = async () => {
     try {
       while (true) {
-        const { value, done } = await reader.read();
+        const { value, done } = await readerRef.current.read();
         if (done) break;
         if (value) {
-          setReceivedData(value);
-          setOutput((prev) => prev + "\n" + value);
+          const text = new TextDecoder().decode(value);
+          setReceivedData(text);
+          setOutput((prev) => prev + "\n" + text);
         }
       }
     } catch (err) {
       console.warn("Đã dừng đọc:", err);
     } finally {
-      reader.releaseLock();
+      readerRef.current?.releaseLock();
     }
   };
 
   const sendData = async (dataMap) => {
-    const writer = writerRef.current;
-
-    if (!portRef.current || !writer) {
-      alert("Thiết bị chưa được kết nối.");
+    if (!writerRef.current) {
+      alert("Chưa kết nối thiết bị.");
       return "";
     }
-
     for (const [, value] of Object.entries(dataMap)) {
-      if (value && value.toString().trim() !== "") {
-        await writer.write(`${value}\n`);
+      if (value?.trim() !== "") {
+        await writerRef.current.write(new TextEncoder().encode(`${value}\n`));
       }
     }
-
-
-    // ❌ không gọi read lại nữa — đã có vòng `readLoop` rồi
     return receivedData;
   };
+
   const disconnect = async () => {
     try {
       const currentPort = portRef.current;
-      if (currentPort && currentPort.readable) {
+      if (currentPort) {
+        if (readerRef.current) {
+          await readerRef.current.cancel();
+          await readerRef.current.releaseLock();
+          readerRef.current = null;
+        }
+        if (writerRef.current) {
+          await writerRef.current.close();
+          writerRef.current.releaseLock();
+          writerRef.current = null;
+        }
         await currentPort.close();
         portRef.current = null;
         setPort(null);
-        alert("Đã đóng kết nối thiết bị.");
+        alert("Đã đóng kết nối thành công.");
       }
     } catch (error) {
-      console.error("Đóng kết nối thất bại:", error);
-      alert("Lỗi khi đóng kết nối.");
+      console.error("Không thể đóng kết nối:", error);
+      alert("Không thể đóng kết nối: " + error.message);
     }
   };
-
 
   return (
     <SerialContext.Provider
@@ -108,7 +97,6 @@ export const SerialProvider = ({ children }) => {
         receivedData,
         output,
         port,
-        setPort,
         setOutput,
       }}
     >
