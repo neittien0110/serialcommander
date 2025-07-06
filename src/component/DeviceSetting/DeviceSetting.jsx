@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./DeviceSetting.css";
 
-function DeviceSetting() {
+function DeviceSetting({ onConfigLoaded }) {
   const { connectToSerial, sendData, output, disconnect } = React.useContext(SerialContext);
 
   const [configs, setConfigs] = useState([]);
@@ -64,6 +64,7 @@ function DeviceSetting() {
       if (!res.ok) throw new Error(data.message || "Không tìm thấy cấu hình.");
 
       setConfig(data);
+      onConfigLoaded && onConfigLoaded(data);
       const initial = {};
       data.components.forEach((c) => {
         initial[c.id] = c.defaultValue || "";

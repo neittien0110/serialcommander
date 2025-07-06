@@ -1,25 +1,45 @@
-// MainApp.tsx
+// GuestApp.tsx
+import { useState } from "react";
 import './App.css';
 import './style.css';
-import './serial_events';
 
 import DeviceSetting from "./component/DeviceSetting/DeviceSetting";
 import { SerialProvider } from "./component/SerialContext";
 
+type DeviceConfig = {
+  leftBanner?: string;
+  rightBanner?: string;
+};
+
 function GuestApp() {
   document.title = import.meta.env.VITE_APP_TITLE;
 
+  const [leftBanner, setLeftBanner] = useState<string>("");
+  const [rightBanner, setRightBanner] = useState<string>("");
+
+  const handleConfigLoaded = (config: DeviceConfig) => {
+    setLeftBanner(config.leftBanner || "");
+    setRightBanner(config.rightBanner || "");
+  };
+
   return (
-    <>
-      <SerialProvider>
-        <div className="container">
-          <div className="scan-device">
-          </div>
-          <div className="device-setting"><DeviceSetting /></div>
-          <div className="list-code-button"></div>
+    <SerialProvider>
+      <div className="container">
+        <div className="scan-device">
+          {leftBanner && (
+            <iframe src={leftBanner} width="100%" height="100%" />
+          )}
         </div>
-      </SerialProvider>
-    </>
+        <div className="device-setting">
+          <DeviceSetting onConfigLoaded={handleConfigLoaded} />
+        </div>
+        <div className="list-code-button">
+          {rightBanner && (
+            <iframe src={rightBanner} width="100%" height="100%" />
+          )}
+        </div>
+      </div>
+    </SerialProvider>
   );
 }
 

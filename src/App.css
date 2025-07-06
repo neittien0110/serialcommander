@@ -48,11 +48,11 @@
 }
 
 .scan-device{
-  width:10%;              /* Phân bổ không gian bằng nhau */
+  width:20%;              /* Phân bổ không gian bằng nhau */
 }
 .device-setting{
-  width:80%;                /* Phân bổ không gian bằng nhau */
+  width:60%;                /* Phân bổ không gian bằng nhau */
 }
 .list-code-button {
-  width:10%;                 /* Phân bổ không gian bằng nhau */
+  width:20%;                 /* Phân bổ không gian bằng nhau */
 }
