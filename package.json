@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm version patch --no-git-tag-version",
     "dev": "vite --host 0.0.0.0",
+    "prebuild": "npm version minor --no-git-tag-version",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"    
+    "lint": "eslint .",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "react": "^19.0.0",
