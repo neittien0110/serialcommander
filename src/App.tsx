@@ -4,7 +4,8 @@ import AppRoutes from "./AppRoutes";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-
+  /// Thiết lập tên trang web dựa theo <---  vite.config.ts <--- package.json 
+  document.title = import.meta.env.VITE_APP_NAME + " v" + import.meta.env.VITE_APP_VERSION
   return (
     <Router>
       <AppRoutes isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
