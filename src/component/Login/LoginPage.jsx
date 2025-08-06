@@ -10,7 +10,8 @@ function LoginPage({ onLoginSuccess }) {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("https://be-datn-mc6y.onrender.com/api/auth/login", {
+      const url = `${import.meta.env.VITE_SPECIALIZED_API_URL}/api/auth/login`;
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

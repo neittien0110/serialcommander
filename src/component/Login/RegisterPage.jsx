@@ -15,7 +15,7 @@ function RegisterPage({ }) {
 
   const handleRegister = async () => {
     try {
-      const res = await fetch("https://be-datn-mc6y.onrender.com/api/auth/register", {
+      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

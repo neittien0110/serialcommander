@@ -20,7 +20,7 @@ function DeviceSetting({ onConfigLoaded }) {
   useEffect(() => {
     const fetchConfigs = async () => {
       try {
-        const res = await fetch("https://be-datn-mc6y.onrender.com/configs/myconfigs", {
+        const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/myconfigs`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -51,8 +51,8 @@ function DeviceSetting({ onConfigLoaded }) {
   const loadConfigById = async (idOrCode) => {
     try {
       const url = isGuest
-        ? `https://be-datn-mc6y.onrender.com/share/${idOrCode}`
-        : `https://be-datn-mc6y.onrender.com/configs/${idOrCode}`;
+        ? `${import.meta.env.VITE_SPECIALIZED_API_URL}/share/${idOrCode}`
+        : `${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${idOrCode}`;
 
       const res = await fetch(url, {
         headers: isGuest
@@ -112,7 +112,7 @@ function DeviceSetting({ onConfigLoaded }) {
     const text = await file.text();
     try {
       const payload = JSON.parse(text);
-      const res = await fetch("https://be-datn-mc6y.onrender.com/configs/import", {
+      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/import`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +133,7 @@ function DeviceSetting({ onConfigLoaded }) {
 
   const handleExport = async () => {
     if (!selectedConfigId) return;
-    const res = await fetch(`https://be-datn-mc6y.onrender.com/configs/export/${selectedConfigId}`, {
+    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/export/${selectedConfigId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -153,7 +153,7 @@ function DeviceSetting({ onConfigLoaded }) {
 
   const handleShare = async () => {
     if (!selectedConfigId) return;
-    const res = await fetch(`https://be-datn-mc6y.onrender.com/configs/share/${selectedConfigId}`, {
+    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/share/${selectedConfigId}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -167,7 +167,7 @@ function DeviceSetting({ onConfigLoaded }) {
     if (!selectedConfigId) return;
     if (!window.confirm("Bạn chắc chắn muốn xoá cấu hình này?")) return;
     try {
-      const res = await fetch(`https://be-datn-mc6y.onrender.com/configs/${selectedConfigId}`, {
+      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${selectedConfigId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
