@@ -1,7 +1,5 @@
 // GuestApp.tsx
 import { useState } from "react";
-import './App.css';
-import './style.css';
 
 import DeviceSetting from "./component/DeviceSetting/DeviceSetting";
 import { SerialProvider } from "./component/SerialContext";
@@ -25,15 +23,15 @@ function GuestApp() {
   return (
     <SerialProvider>
       <div className="container">
-        <div className="scan-device">
+        <div className="">
           {leftBanner && (
             <iframe src={leftBanner} width="100%" height="100%" />
           )}
         </div>
-        <div className="device-setting">
+        <div className="">
           <DeviceSetting onConfigLoaded={handleConfigLoaded} />
         </div>
-        <div className="list-code-button">
+        <div className="">
           {rightBanner && (
             <iframe src={rightBanner} width="100%" height="100%" />
           )}

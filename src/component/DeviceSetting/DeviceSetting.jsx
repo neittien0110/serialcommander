@@ -3,8 +3,6 @@ import ComponentRenderer from "../componentrenderer/ComponentRenderer";
 import { SerialContext } from "../SerialContext";
 import { useNavigate } from "react-router-dom";
 
-import "./DeviceSetting.css";
-
 function DeviceSetting({ onConfigLoaded }) {
   const { connectToSerial, sendData, output, disconnect } = React.useContext(SerialContext);
 
