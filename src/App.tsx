@@ -6,7 +6,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   return (
-    <Router>
+    <Router basename={import.meta.env.VITE_BASE_URL}>     { /* Thiết lập basename cho các liên kết động */ }
       <AppRoutes isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
     </Router>
   );
