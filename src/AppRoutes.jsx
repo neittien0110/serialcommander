@@ -2,15 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./component/Login/LoginPage";
 import RegisterPage from "./component/Login/RegisterPage";
 import MainApp from "./MainApp";
-import GuestApp from "./GuestApp";
-
 
 const AppRoutes = ({ isLoggedIn, setIsLoggedIn }) => {
   return (
     <Routes>
       <Route
         path="/"
-        element={isLoggedIn ? <MainApp /> : <GuestApp />}
+        element={<MainApp />}
       />
       <Route
         path="/login"
