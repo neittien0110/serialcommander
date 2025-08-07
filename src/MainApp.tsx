@@ -36,7 +36,7 @@ function MainApp() {
           <Col md={4} lg={3} className="d-none d-sm-block">
             <h2 className="d-flex justify-content-center align-items-center">Hướng dẫn sử dụng</h2>
             <hr/>
-            <div className="text-wrap">
+            <div className="text-wrap text-break">
               {rightBanner}
             </div>
             <hr/>
