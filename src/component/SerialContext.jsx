@@ -15,10 +15,18 @@ export const SerialProvider = ({ children }) => {
       alert("Trình duyệt không hỗ trợ Web Serial API.");
       return;
     }
+
+    let selectedPort;
     try {
-      const selectedPort = await navigator.serial.requestPort();
+      selectedPort = await navigator.serial.requestPort();
+    } catch {
+      return;
+    }
+
+    try {  
       await selectedPort.open({ baudRate: parseInt(baudrate) || 115200 });
       portRef.current = selectedPort;
+      
       setPort(selectedPort);
 
       writerRef.current = selectedPort.writable.getWriter();

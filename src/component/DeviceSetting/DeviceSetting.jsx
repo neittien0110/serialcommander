@@ -3,6 +3,15 @@ import ComponentRenderer from "../componentrenderer/ComponentRenderer";
 import { SerialContext } from "../SerialContext";
 import { useNavigate } from "react-router-dom";
 
+import Container from 'react-bootstrap/Container';
+import Button from 'react-bootstrap/Button';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import SplitButton from 'react-bootstrap/SplitButton';
+import Overlay from 'react-bootstrap/Overlay';
 function DeviceSetting({ onConfigLoaded }) {
   const { connectToSerial, sendData, output, disconnect } = React.useContext(SerialContext);
 
@@ -93,10 +102,6 @@ function DeviceSetting({ onConfigLoaded }) {
 
     // ✅ Thêm phản hồi vào khung output tổng
     setOutput((prev) => prev + `↪ ${id}: ${response}\n`);
-  };
-
-  const handleSendAll = async () => {
-    await sendData(values);
   };
 
   const handleImport = () => {
@@ -190,63 +195,110 @@ function DeviceSetting({ onConfigLoaded }) {
     window.location.reload(); // để cập nhật lại trạng thái giao diện
   };
 
-  return (
-    <div className="devicesetting">
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-        {isGuest ? (
-          <button onClick={handleLogin}>Đăng nhập</button>
-        ) : (
-          <button onClick={handleLogout}>Đăng xuất</button>
-        )}
-      </div>
+  const onClickConnectToDevice = () => {
+    connectToSerial(config?.baudrate || 115200)
+  };
 
-      <h2 className="title">Chọn cấu hình thiết bị</h2>
-      <div className="info-item">
-        {isGuest ? (
-          <>
-            <input
-              type="text"
-              placeholder="Nhập mã chia sẻ..."
-              value={selectedConfigId || ""}
-              onChange={(e) => setSelectedConfigId(e.target.value)}
-            />
-            <button onClick={() => loadConfigById(selectedConfigId)}>Tải cấu hình</button>
-          </>
-        ) : (
-          <>
-            <select
-              onChange={(e) => setSelectedConfigId(e.target.value)}
-              value={selectedConfigId || ""}
-            >
-              <option value="">-- Chọn cấu hình --</option>
-              {configs.map((cfg) => (
-                <option key={cfg.id} value={cfg.id}>
-                  {cfg.name}
-                </option>
-              ))}
-            </select>
-            <button onClick={handleImport}>Import</button>
-            <button onClick={handleExport}>Export</button>
-            <button onClick={handleShare}>Share</button>
-            <input
-              type="file"
-              accept="application/json"
-              style={{ display: "none" }}
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-            />
-          </>
-        )}
-        <button
-          onClick={() => connectToSerial(config?.baudrate || 115200)}
-        >
-          Kết nối thiết bị
-        </button>
-        <button onClick={disconnect}>Đóng kết nối</button>
-        {!isGuest && (
-          <button onClick={handleDeleteConfig}>Xoá cấu hình</button>
-        )}
-        <button onClick={handleSendAll}>Gửi toàn bộ cấu hình</button>
+  return (
+    <div>
+      <Navbar expand="lg" className="bg-body-tertiary">
+        <Container>
+          <Navbar.Brand href="#home">
+            Mã chia sẻ
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          &nbsp;
+          <div className="vr"></div>
+          &nbsp;
+          <Navbar.Collapse id="basic-navbar-nav">
+            {isGuest ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Nhập mã chia sẻ..."
+                  value={selectedConfigId || ""}
+                  onChange={(e) => setSelectedConfigId(e.target.value)}
+                />
+                &nbsp;
+                <button onClick={() => loadConfigById(selectedConfigId)}>
+                  ..
+                </button>
+
+              </>
+            ) : (
+              <>
+                <select
+                  onChange={(e) => setSelectedConfigId(e.target.value)}
+                  value={selectedConfigId || ""}
+                >
+                  <option value="">-- Chọn cấu hình --</option>
+                  {configs.map((cfg) => (
+                    <option key={cfg.id} value={cfg.id}>
+                      {cfg.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="file"
+                  accept="application/json"
+                  style={{ display: "none" }}
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                />
+              </>
+            )}
+            <Nav className="me-auto">
+              <NavDropdown title="Cấu hình" id="basic-nav-dropdown">
+                <NavDropdown.Item onClick={handleImport}> Nhập vào từ file json... </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleExport}> Xuất ra file json        </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleDeleteConfig}> Xoá cấu hình hiện thời..</NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={handleShare}>  Chia sẻ với cộng đồng    </NavDropdown.Item>
+              </NavDropdown>
+            </Nav>
+            <Nav className="me-auto">
+              <NavDropdown title="Hợp tác (todo)" id="basic-nav-dropdown">
+                <NavDropdown.Item onClick={handleImport}> Kết nối từ xa (todo)... </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleExport}> Ngắt kết nối (todo)  </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={""} className="text-bg-info">  Chia sẻ phiên (todo)</NavDropdown.Item>
+                <NavDropdown.Item onClick={""} className="text-bg-info">  Dừng chia sẻ (todo)</NavDropdown.Item>
+              </NavDropdown>
+            </Nav>            
+            &nbsp;
+            <div className="vr"></div>
+            &nbsp;
+          </Navbar.Collapse>
+          {isGuest ? (<Nav.Link onClick={handleLogin}>Đăng nhập</Nav.Link>)
+            : (<Nav.Link onClick={handleLogout}>Đăng xuất</Nav.Link>)}
+        </Container>
+      </Navbar>
+
+
+      <h2 className="title">Kết nối Serial</h2>
+
+      <div className="info-item align-items-center text-center">
+
+        <Button variant="danger" onClick={onClickConnectToDevice}>Kết nối thiết bị</Button>
+        &nbsp;
+        &nbsp;
+        <SplitButton
+            key='baudrate'
+            id='dropdown-split-variants-baudrate'
+            variant='warning'
+            title='baudrate (todo)'
+          >
+            <Dropdown.Item eventKey="4800">4800</Dropdown.Item>
+            <Dropdown.Item eventKey="9600">9600</Dropdown.Item>
+            <Dropdown.Item eventKey="19200">19200</Dropdown.Item>
+            <Dropdown.Item eventKey="38400">38400</Dropdown.Item>
+            <Dropdown.Item eventKey="57600">57600</Dropdown.Item>
+            <Dropdown.Item eventKey="115200">11520</Dropdown.Item>
+            <Dropdown.Item eventKey="230400">230400</Dropdown.Item>
+          </SplitButton>
+        &nbsp;
+        &nbsp;
+        <Button variant="success" onClick={disconnect}>Ngắt kết nối</Button>          
       </div>
 
 
