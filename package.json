@@ -1,13 +1,16 @@
 {
-  "name": "serialcommander",
+  "name": "Serial Commander",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
+    "predev": "npm version patch --no-git-tag-version",
     "dev": "vite --host 0.0.0.0",
+    "prebuild": "npm version minor --no-git-tag-version",
     "build": "tsc -b && vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "bootstrap": "^5.3.7",
@@ -18,13 +21,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
-    "@types/node": "^24.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
+    "gh-pages": "^6.3.0",
     "globals": "^15.14.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",

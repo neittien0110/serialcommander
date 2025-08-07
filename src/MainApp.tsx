@@ -13,8 +13,6 @@ type DeviceConfig = {
 };
 
 function MainApp() {
-  document.title = import.meta.env.VITE_APP_TITLE;
-
   const [leftBanner, setLeftBanner] = useState<string>("");
   const [rightBanner, setRightBanner] = useState<string>("");
 
