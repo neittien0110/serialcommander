@@ -7,7 +7,11 @@ const AppRoutes = ({ isLoggedIn, setIsLoggedIn }) => {
   return (
     <Routes>
       <Route
-        path="/"
+        path='/'       //Bổ sung mã chia sẻ trên url
+        element={<MainApp />}
+      />      
+      <Route
+        path='/:sharecodefromurl'       //Bổ sung mã chia sẻ trên url
         element={<MainApp />}
       />
       <Route

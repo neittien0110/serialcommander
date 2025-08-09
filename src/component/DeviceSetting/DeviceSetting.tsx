@@ -15,6 +15,7 @@ import SplitButton from 'react-bootstrap/SplitButton';
 import { SerialConfig } from '../../dto/SerialConfig';
 import { SerialAction } from "../../dto/SerialAction";
 
+import { useParams } from "react-router-dom";     //Lấy tham số từ URL
 
 // Định nghĩa kiểu cho props
 interface DeviceSettingProps {
@@ -40,6 +41,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   const isGuest = !localStorage.getItem("token");
   const navigate = useNavigate();
 
+   // Lấy giá trị của tham số từ URL.
+  // Tên biến 'sharecode' phải trùng với tên đã thiết lập route '/:sharecode'.
+  const { sharecodefromurl } = useParams();
   /**
    * Lấy về toàn bộ CÁC cấu hình của TÀI KHOẢN hiện tại
    * @description do cần gọi hàm async fetch nên bắt buộc phải tạo một hàm async fetchConfigs và gọi ra ngay lập tức. Đây là qui định của useEffect.
@@ -48,6 +52,12 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
 
     const fetchConfigs = async () => {
       try {
+        if (isGuest) {
+          /// Xóa state
+          setConfigs([]);
+          setSelectedConfigId(null);
+          return;
+        }
         // Gửi yêu cầu tải về về các cấu hình của tài khoản hiện thời
         const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/myconfigs`, {
           headers: {
@@ -97,13 +107,23 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConfigId]);
 
+  /**
+   * Logix xử lý khi đăng xuất
+   */
   useEffect(() => {
 
     if (isGuest) {
-      setSelectedConfigId(0);
+      loadConfigById(null, import.meta.env.VITE_DEFAULT_SHARE_CODE );
     }
   }, [isGuest]);
 
+
+   useEffect(() => {
+  if (sharecodefromurl && sharecodefromurl != shareCode)  {
+    console.log(`URL ShareCode: ${sharecodefromurl}`);
+    loadConfigById(null, sharecodefromurl );
+  }
+  }, [sharecodefromurl]);
 
   /**
    * Nạp tải cấu hình lên giao diện với các component

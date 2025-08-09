@@ -21,8 +21,7 @@ function isURL(str: string): boolean {
 function MainApp() {
   const [leftBanner, setLeftBanner] = useState<string>("");
   const [rightBanner, setRightBanner] = useState<string>("");
-  //const [shareCode, setShareCode] = useState<string>("");
-
+    
   /**
    * Thay đổi banner theo cấu hình
    * @param config Cấu trúc chứa cấu hình hiện thời
