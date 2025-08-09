@@ -33,7 +33,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   /** Nội đung hoàn chỉnh của cấu hình đang được render lên giao diện, tương ứng với selectedConfigId */
   const [config, setConfig] = useState<SerialConfig | null>(null);
   /** Danh sách các serial default command  và id của từng SerialAction */
-  const [values, setValues] = useState<{ [key: number]: string }>({});
+  const [serialCommands, setSerialCommands] = useState<{ [key: number]: string }>({});
   /** Điều khiển upload file cấu hình */
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [feedbacks, setFeedbacks] = useState<string[]>([]);
@@ -89,7 +89,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   useEffect(() => {
     async function fetchData() {
       if (selectedConfigId) {
-        // Render giao diện phần thân chính, đồng thời lúc này mới có state config, shareCode, values
+        // Render giao diện phần thân chính, đồng thời lúc này mới có state config, shareCode, serialCommands
         await loadConfigById(selectedConfigId, null);
       }
     };
@@ -108,7 +108,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   /**
    * Nạp tải cấu hình lên giao diện với các component
    * @param idOrCode    Id hoặc ShareCode của cấu hình
-   * @return  state config, state values, state ShareCode
+   * @return  state config, state serialCommands, state ShareCode
    */
   async function loadConfigById(configId: number | null, shareCode: string | null): Promise<SerialConfig | null> {
     try {
@@ -150,18 +150,18 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       data.components.forEach((c : SerialAction) => {
         initial[c.id] = c.defaultValue || "";
       });
-      setValues(initial);
+      setSerialCommands(initial);
       return data;
     } catch (err) {
       alert("Lỗi khi tải cấu hình: " + (err instanceof Error ? err.message : String(err)));
       setConfig(null);
-      setValues({});
+      setSerialCommands({});
       throw err;
     }
   };
 
   const handleChange = (id : number, value : string) => {
-    setValues((prev) => ({ ...prev, [id]: value }));
+    setSerialCommands((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSendSingle = async (value : string, id : number) => {
@@ -377,9 +377,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
               <ComponentRenderer
                 key={comp.id}
                 component={comp}
-                value={values[comp.id]}
+                value={serialCommands[comp.id]}
                 onChange={(val : string) => handleChange(comp.id, val)}
-                onSend={() => handleSendSingle(values[comp.id], comp.id)}
+                onSend={() => handleSendSingle(serialCommands[comp.id], comp.id)}
                 feedback={feedbacks[comp.id] || ""}
               />
 
