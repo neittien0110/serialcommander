@@ -89,16 +89,8 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   useEffect(() => {
     async function fetchData() {
       if (selectedConfigId) {
-        // Render giao diện phần thân chính, đồng thời lúc này mới có state config
-        const newConfig = await loadConfigById(selectedConfigId);
-        // Hiển thị mã share code lên giao diện
-        if (newConfig) {
-          if (newConfig.isShared) {
-            setShareCode(newConfig.shareCode);
-          } else {
-            setShareCode("");
-          }
-        }
+        // Render giao diện phần thân chính, đồng thời lúc này mới có state config, shareCode, values
+        await loadConfigById(selectedConfigId, null);
       }
     };
     fetchData();
@@ -116,14 +108,21 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   /**
    * Nạp tải cấu hình lên giao diện với các component
    * @param idOrCode    Id hoặc ShareCode của cấu hình
-   * @return  state config, state values
+   * @return  state config, state values, state ShareCode
    */
-  async function loadConfigById(idOrCode: number): Promise<SerialConfig> {
+  async function loadConfigById(configId: number | null, shareCode: string | null): Promise<SerialConfig | null> {
     try {
-      // TODO: cần thay đổi cách xử lý gộp với Guest/Logined này
-      const url = isGuest
-        ? `${import.meta.env.VITE_SPECIALIZED_API_URL}/share/${idOrCode}`
-        : `${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${idOrCode}`;
+      let url: string;
+      if (configId == null) {
+        if (shareCode !=null) {
+          url = `${import.meta.env.VITE_SPECIALIZED_API_URL}/share/${shareCode}`;
+        } else {
+          return null;
+        }
+      } else {
+        url = `${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${configId}`;
+      }
+      console.log(url);
 
       /// Tạo request để tải cấu hình về
       const res = await fetch(url, {
@@ -134,8 +133,14 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       /// Đợi response
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Không tìm thấy cấu hình.");
-      /// Lưu state
+      /// Lưu state chứa toàn bộ cấu hình
       setConfig(data);
+      // Ghi nhận vào state chứa mã chia sẻ
+      if (shareCode == null) {
+        setShareCode(data.shareCode);
+      }else{
+        setShareCode(shareCode);
+      }
       /// Cập nhật banner hiển thị thông tin hướng dẫn hoặc quảng cáo mà URL năm trong cấu hình
       if (onConfigLoaded) {
         onConfigLoaded(data);
@@ -281,7 +286,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container>
           <Navbar.Brand id="sharedcode">
-            <ShareCode code={shareCode} />
+            <ShareCode code={shareCode} UpdateGUI={loadConfigById} />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           &nbsp;
