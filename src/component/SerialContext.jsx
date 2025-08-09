@@ -4,7 +4,7 @@ export const SerialContext = createContext();
 
 export const SerialProvider = ({ children }) => {
   const [port, setPort] = useState(null);
-  const [output, setOutput] = useState("");
+  const [serialOutput, setSerialOutput] = useState("");
   const [receivedData, setReceivedData] = useState("");
   const portRef = useRef(null);
   const readerRef = useRef(null);
@@ -48,7 +48,7 @@ export const SerialProvider = ({ children }) => {
         if (value) {
           const text = new TextDecoder().decode(value);
           setReceivedData(text);
-          setOutput((prev) => prev + "\n" + text);
+          setSerialOutput((prev) => prev + "\n" + text);
         }
       }
     } catch (err) {
@@ -103,9 +103,9 @@ export const SerialProvider = ({ children }) => {
         sendData,
         disconnect,
         receivedData,
-        output,
+        serialOutput,
         port,
-        setOutput,
+        setSerialOutput,
       }}
     >
       {children}

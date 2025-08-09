@@ -13,6 +13,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import SplitButton from 'react-bootstrap/SplitButton';
 
 import { SerialConfig } from '../../dto/SerialConfig';
+import { SerialAction } from "../../dto/SerialAction";
 
 
 // Định nghĩa kiểu cho props
@@ -22,7 +23,7 @@ interface DeviceSettingProps {
 
 
 function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
-  const { connectToSerial, sendData, serialOutput, disconnect } = React.useContext(SerialContext);
+  const { connectToSerial, sendData, serialOutput, setSerialOutput, disconnect } = React.useContext(SerialContext);
 
   const [shareCode, setShareCode] = useState<string>("");
   /** Chứa danh sách các cấu hình của tài khoản hiện thời */
@@ -32,9 +33,10 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   /** Nội đung hoàn chỉnh của cấu hình đang được render lên giao diện, tương ứng với selectedConfigId */
   const [config, setConfig] = useState<SerialConfig | null>(null);
   /** Danh sách các serial default command  và id của từng SerialAction */
-  const [values, setValues] = useState({});
-  const fileInputRef = useRef();
-  const [feedbacks, setFeedbacks] = useState({});
+  const [values, setValues] = useState<{ [key: number]: string }>({});
+  /** Điều khiển upload file cấu hình */
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [feedbacks, setFeedbacks] = useState<string[]>([]);
   const isGuest = !localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -106,7 +108,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   useEffect(() => {
 
     if (isGuest) {
-      setSelectedConfigId("00000");
+      setSelectedConfigId(0);
     }
   }, [isGuest]);
 
@@ -116,7 +118,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
    * @param idOrCode    Id hoặc ShareCode của cấu hình
    * @return  state config, state values
    */
-  async function loadConfigById(idOrCode: string): Promise<SerialConfig> {
+  async function loadConfigById(idOrCode: number): Promise<SerialConfig> {
     try {
       // TODO: cần thay đổi cách xử lý gộp với Guest/Logined này
       const url = isGuest
@@ -140,7 +142,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       }
       /// Lưu lại vào state danh sách các serial default command chứa trong cấu hình
       const initial: { [key: number]: string } = {};
-      data.components.forEach((c) => {
+      data.components.forEach((c : SerialAction) => {
         initial[c.id] = c.defaultValue || "";
       });
       setValues(initial);
@@ -153,25 +155,29 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     }
   };
 
-  const handleChange = (id, value) => {
+  const handleChange = (id : number, value : string) => {
     setValues((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSendSingle = async (value, id) => {
+  const handleSendSingle = async (value : string, id : number) => {
     const response = await sendData({ [id]: value });
 
     setFeedbacks((prev) => ({ ...prev, [id]: response }));
 
     // ✅ Thêm phản hồi vào khung output tổng
-    setOutput((prev) => prev + `↪ ${id}: ${response}\n`);
+    setSerialOutput((prev : string) => prev + `↪ ${id}: ${response}\n`);
   };
 
   const handleImport = () => {
-    fileInputRef.current.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
     if (!file) return;
 
     const text = await file.text();
@@ -252,7 +258,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       alert("Xoá thành công!");
       window.location.reload();
     } catch (err) {
-      alert("Lỗi khi xoá cấu hình: " + err.message);
+      alert("Lỗi khi xoá cấu hình: " + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -282,7 +288,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           <Navbar.Collapse id="basic-navbar-nav">
             <select
               title="Serial Configurations"
-              onChange={(e) => setSelectedConfigId(e.target.value)}
+              onChange={(e ) => setSelectedConfigId(e.target.value ? Number(e.target.value) : null)}
               disabled={isGuest}
               value={selectedConfigId || ""}
             >
@@ -316,7 +322,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
                 <NavDropdown.Item onClick={handleImport} className="text-danger"> <i className="bi bi-link-45deg"></i> Kết nối từ xa (todo)... </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleExport}> <i className="bi bi-ban"></i> Ngắt kết nối (todo)  </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item className="text-danger"> <i class="bi bi-share"></i> Chia sẻ phiên (todo)</NavDropdown.Item>
+                <NavDropdown.Item className="text-danger"> <i className="bi bi-share"></i> Chia sẻ phiên (todo)</NavDropdown.Item>
                 <NavDropdown.Item > <i className="bi bi-wifi-off"></i> Dừng chia sẻ (todo)</NavDropdown.Item>
               </NavDropdown>
             </Nav>
@@ -362,12 +368,12 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           <p><strong>Hệ thống:</strong> {config.description}</p>
 
           <div>
-            {config.components.map((comp) => (
+            {config.components.map((comp : SerialAction) => (
               <ComponentRenderer
                 key={comp.id}
                 component={comp}
                 value={values[comp.id]}
-                onChange={(val) => handleChange(comp.id, val)}
+                onChange={(val : string) => handleChange(comp.id, val)}
                 onSend={() => handleSendSingle(values[comp.id], comp.id)}
                 feedback={feedbacks[comp.id] || ""}
               />

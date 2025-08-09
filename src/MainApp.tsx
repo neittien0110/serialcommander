@@ -39,7 +39,7 @@ function MainApp() {
         <Row className="justify-content-center gx-0"> {/* Thêm gx-0 để loại bỏ khoảng cách ngang */}
           <Col lg={3} className="d-none d-lg-block">  {/* Với container fluid thì đặt sm={0} ko có tác dụng */}
             <div className="fs-4 text-left text-truncate">
-              <img id="navlogo" src="/serial-port-svgrepo-com.svg" alt="logo"></img> &nbsp;
+              <img id="navlogo" src="./serial-port-svgrepo-com.svg" alt="logo"></img> &nbsp;
               Serial Commander
             </div>
             {isURL(leftBanner) ? (<iframe src={leftBanner} className="w-100 h-100" title="left banner" />)
