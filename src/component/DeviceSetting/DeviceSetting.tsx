@@ -52,9 +52,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
 
     const fetchConfigs = async () => {
       try {
-        if (isGuest) {
-          /// Xóa state
-          setConfigs([]);
+        /// Nếu chưa đăng nhập, hoặc có đăng nhập nhưng sử dụng mã chia sẻ thì không được chọn bất cứ cấu hình nào
+        if (isGuest || sharecodefromurl )  {
+          /// Xóa danh sách các cấu hình nếu là guest
+          if (isGuest) setConfigs([]);
+          /// Xóa cấu hình đang chọn
           setSelectedConfigId(null);
           return;
         }
@@ -151,8 +153,8 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           : { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       /// Đợi response
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Không tìm thấy cấu hình.");
+      const data = await res.json() as SerialConfig;
+      if (!res.ok) throw new Error("Không tìm thấy cấu hình.");
       /// Lưu state chứa toàn bộ cấu hình
       setConfig(data);
       // Ghi nhận vào state chứa mã chia sẻ
@@ -160,7 +162,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
         setShareCode(data.shareCode);
       }else{
         setShareCode(shareCode);
+        setSelectedConfigId(null);
       }
+
       /// Cập nhật banner hiển thị thông tin hướng dẫn hoặc quảng cáo mà URL năm trong cấu hình
       if (onConfigLoaded) {
         onConfigLoaded(data);
@@ -301,6 +305,14 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     connectToSerial(config?.baudrate || 115200)
   };
 
+  function handleInputShareCode(): void {
+      const manualShareCode : string|null = prompt("Nhập mã chia sẻ của một cấu hình nào dó bạn biết.", "");
+      if (manualShareCode != null) {
+        // Gọi hàm ngoài update lại giao diện
+        loadConfigById(null, manualShareCode);
+      }
+  }
+
   return (
     <div>
       <Navbar expand="lg" className="bg-body-tertiary">
@@ -331,8 +343,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
               ref={fileInputRef}
               onChange={handleFileUpload}
             />
+            
             <Nav className="me-auto">
-              <NavDropdown title="Cấu hình" id="basic-nav-dropdown">                
+              <NavDropdown title="Cấu hình" id="basic-nav-dropdown">
+                <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i class="bi bi-code-square"></i> Nhập mã cấu hình...</NavDropdown.Item>
+                <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-danger")}> <i className="bi bi-globe"></i> Chia sẻ với cộng đồng    </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-dark")}> <i className="bi bi-person-lock"></i> Dừng chia sẻ (todo) </NavDropdown.Item>
                 <NavDropdown.Divider />
