@@ -16,7 +16,7 @@ $sourcePaths = 'dist/* package.json .env.production'
 
 $username = "dev"
 $remoteHost = "toolhub.app"
-$remotePath = "/home/dev/toolhub.app/serialcommander"
+$remotePath = "/home/dev/serial.toolhub.app"
 
 # Nhập mật khẩu một lần duy nhất, nên nhập trong quá trình chạy script
 $password = Read-Host -Prompt "Mật khẩu tài khoản ${username}:" -AsSecureString

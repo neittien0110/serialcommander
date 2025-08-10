@@ -104,6 +104,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
         // Render giao diện phần thân chính, đồng thời lúc này mới có state config, shareCode, serialCommands
         await loadConfigById(selectedConfigId, null);
       }
+      else {
+        setShareCode("");
+      }
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,6 +120,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     if (isGuest) {
       loadConfigById(null, import.meta.env.VITE_DEFAULT_SHARE_CODE );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGuest]);
 
 
@@ -125,6 +129,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     console.log(`URL ShareCode: ${sharecodefromurl}`);
     loadConfigById(null, sharecodefromurl );
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sharecodefromurl]);
 
   /**
@@ -318,17 +323,13 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container>
           <Navbar.Brand id="sharedcode">
-            <ShareCode code={shareCode} UpdateGUI={loadConfigById} />
+            <ShareCode code={shareCode} />
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          &nbsp;
-          <Navbar.Collapse id="basic-navbar-nav">
-            <select
-              title="Serial Configurations"
-              onChange={(e ) => setSelectedConfigId(e.target.value ? Number(e.target.value) : null)}
-              disabled={isGuest}
-              value={selectedConfigId || ""}
-            >
+            <select   title="Serial Configurations"
+                      onChange={(e ) => setSelectedConfigId(e.target.value ? Number(e.target.value) : null)}
+                      disabled={isGuest}
+                      value={selectedConfigId || ""} 
+                      className="m-auto">
               <option value="">-- Chọn cấu hình --</option>
               {configs.map((cfg) => (
                 <option key={cfg.id} value={cfg.id} className={cfg.isShared ? "text-danger" : "text-dark"}>
@@ -339,24 +340,25 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
             <input
               type="file"
               accept="application/json"
-              style={{ display: "none" }}
+              className="d-none"
               ref={fileInputRef}
               onChange={handleFileUpload}
-            />
-            
+            />                        
+          <Navbar.Toggle aria-controls="basic-navbar-nav"  />     
+          <Navbar.Collapse id="basic-navbar-nav">            
             <Nav className="me-auto">
               <NavDropdown title="Cấu hình" id="basic-nav-dropdown">
-                <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i class="bi bi-code-square"></i> Nhập mã cấu hình...</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i className="bi bi-code-square"></i> Nhập mã cấu hình...</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-danger")}> <i className="bi bi-globe"></i> Chia sẻ với cộng đồng    </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-dark")}> <i className="bi bi-person-lock"></i> Dừng chia sẻ (todo) </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleDeleteConfig} className={isGuest ? "disabled" : ""}> <i className="bi bi-trash"></i> Xoá cấu hình hiện thời..</NavDropdown.Item>
                 <NavDropdown.Item onClick={handleImport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-up"></i> Up lên file cấu hình... </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleExport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-down"></i> Tải về file cấu hình </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleDeleteConfig} className={isGuest ? "disabled" : ""}> <i className="bi bi-trash"></i> Xóa cấu hình hiện thời..</NavDropdown.Item>
               </NavDropdown>
             </Nav>
-          <div className="vr"></div>            
+          <div className="vr d-none d-lg-block"></div>            
             <Nav className="me-auto">
               <NavDropdown title="Hợp tác (todo)" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={handleImport} className="text-danger"> <i className="bi bi-link-45deg"></i> Kết nối từ xa (todo)... </NavDropdown.Item>
@@ -367,11 +369,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
               </NavDropdown>
             </Nav>
             &nbsp;
-            <div className="vr"></div>
+            <div className="vr d-none d-lg-block"></div> 
             &nbsp;
+            {isGuest ? (<Nav.Link onClick={handleLogin} className="text-decoration-underline">Đăng nhập <i className="bi bi-box-arrow-in-right"></i></Nav.Link>)
+              : (<Nav.Link onClick={handleLogout} className="text-decoration-underline">Đăng xuất <i className="bi bi-box-arrow-right"></i></Nav.Link>)}
           </Navbar.Collapse>
-          {isGuest ? (<Nav.Link onClick={handleLogin} className="text-decoration-underline">Đăng nhập <i className="bi bi-box-arrow-in-right"></i></Nav.Link>)
-            : (<Nav.Link onClick={handleLogout} className="text-decoration-underline">Đăng xuất <i className="bi bi-box-arrow-right"></i></Nav.Link>)}
         </Container>
       </Navbar>
 
@@ -423,7 +425,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
 
           <div className="info-item">
             <label>Phản hồi từ thiết bị:</label>
-            <textarea value={serialOutput} readOnly rows={6} style={{ width: "100%" }} />
+            <textarea value={serialOutput} readOnly rows={6} className="w-100"/>
           </div>
         </>
       )}
