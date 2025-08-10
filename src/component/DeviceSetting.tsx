@@ -19,7 +19,7 @@ import { useParams } from "react-router-dom";     //Lấy tham số từ URL
 
 // Định nghĩa kiểu cho props
 interface DeviceSettingProps {
-  onConfigLoaded: (config: SerialConfig) => void;
+  onConfigLoaded: (scenario: SerialConfig) => void;
 }
 
 
@@ -27,15 +27,15 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   const { connectToSerial, sendData, serialOutput, setSerialOutput, disconnect } = React.useContext(SerialContext);
 
   const [shareCode, setShareCode] = useState<string>("");
-  /** Chứa danh sách các cấu hình của tài khoản hiện thời */
-  const [configs, setConfigs] = useState<SerialConfig[]>([]);
-  /** ID của cấu hình đang được áp dụng/hiển thị lên giao diện. */
+  /** Chứa danh sách các kịch bản của tài khoản hiện thời */
+  const [scenarios, setSenarios] = useState<SerialConfig[]>([]);
+  /** ID của kịch bản đang được áp dụng/hiển thị lên giao diện. */
   const [selectedConfigId, setSelectedConfigId] = useState<number | null>(null);
-  /** Nội đung hoàn chỉnh của cấu hình đang được render lên giao diện, tương ứng với selectedConfigId */
-  const [config, setConfig] = useState<SerialConfig | null>(null);
+  /** Nội đung hoàn chỉnh của kịch bản đang được render lên giao diện, tương ứng với selectedConfigId */
+  const [scenario, setConfig] = useState<SerialConfig | null>(null);
   /** Danh sách các serial default command  và id của từng SerialAction */
   const [serialCommands, setSerialCommands] = useState<{ [key: number]: string }>({});
-  /** Điều khiển upload file cấu hình */
+  /** Điều khiển upload file kịch bản */
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [feedbacks, setFeedbacks] = useState<string[]>([]);
   const isGuest = !localStorage.getItem("token");
@@ -45,46 +45,46 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   // Tên biến 'sharecode' phải trùng với tên đã thiết lập route '/:sharecode'.
   const { sharecodefromurl } = useParams();
   /**
-   * Lấy về toàn bộ CÁC cấu hình của TÀI KHOẢN hiện tại
+   * Lấy về toàn bộ CÁC kịch bản của TÀI KHOẢN hiện tại
    * @description do cần gọi hàm async fetch nên bắt buộc phải tạo một hàm async fetchConfigs và gọi ra ngay lập tức. Đây là qui định của useEffect.
    */
   useEffect(() => {
 
     const fetchConfigs = async () => {
       try {
-        /// Nếu chưa đăng nhập, hoặc có đăng nhập nhưng sử dụng mã chia sẻ thì không được chọn bất cứ cấu hình nào
+        /// Nếu chưa đăng nhập, hoặc có đăng nhập nhưng sử dụng mã chia sẻ thì không được chọn bất cứ kịch bản nào
         if (isGuest || sharecodefromurl )  {
-          /// Xóa danh sách các cấu hình nếu là guest
-          if (isGuest) setConfigs([]);
-          /// Xóa cấu hình đang chọn
+          /// Xóa danh sách các kịch bản nếu là guest
+          if (isGuest) setSenarios([]);
+          /// Xóa kịch bản đang chọn
           setSelectedConfigId(null);
           return;
         }
-        // Gửi yêu cầu tải về về các cấu hình của tài khoản hiện thời
-        const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/myconfigs`, {
+        // Gửi yêu cầu tải về về các kịch bản của tài khoản hiện thời
+        const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/myscenarios`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        /// Lấy về các cấu hình
+        /// Lấy về các kịch bản
         const data = await res.json();
         /// Phân tích trạng thái response
         if (res.ok) {
-          /// Nếu ổn thì lưu vào state configs
-          setConfigs(data);
-          /// Nếu ổn thì lưu vào state configs
+          /// Nếu ổn thì lưu vào state scenarios
+          setSenarios(data);
+          /// Nếu ổn thì lưu vào state scenarios
           if (data.length > 0) {
-            /// - Coi như người dùng chọn cấu hình đầu tiên. Lưu state Id này ==> kích hoạt useEffect update
+            /// - Coi như người dùng chọn kịch bản đầu tiên. Lưu state Id này ==> kích hoạt useEffect update
             setSelectedConfigId(data[0].id);
           }
         } else {
-          console.error("Lỗi khi lấy danh sách cấu hình:", res.text);
+          console.error("Lỗi khi lấy danh sách kịch bản:", res.text);
         }
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.error("Lỗi khi lấy danh sách cấu hình:", err.message);
+          console.error("Lỗi khi lấy danh sách kịch bản:", err.message);
         } else {
-          console.error("Lỗi khi lấy danh sách cấu hình:", String(err));
+          console.error("Lỗi khi lấy danh sách kịch bản:", String(err));
         }
       }
     };
@@ -95,13 +95,13 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   /// 
 
   /** 
-   * Logic xử lý khi thay đổi cấu hình được chọn
+   * Logic xử lý khi thay đổi kịch bản được chọn
    * @prop selectedConfigId  Nếu state thay đổi thì tự động kích hoạt logic
    */
   useEffect(() => {
     async function fetchData() {
       if (selectedConfigId) {
-        // Render giao diện phần thân chính, đồng thời lúc này mới có state config, shareCode, serialCommands
+        // Render giao diện phần thân chính, đồng thời lúc này mới có state scenario, shareCode, serialCommands
         await loadConfigById(selectedConfigId, null);
       }
       else {
@@ -133,9 +133,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   }, [sharecodefromurl]);
 
   /**
-   * Nạp tải cấu hình lên giao diện với các component
-   * @param idOrCode    Id hoặc ShareCode của cấu hình
-   * @return  state config, state serialCommands, state ShareCode
+   * Nạp tải kịch bản lên giao diện với các component
+   * @param idOrCode    Id hoặc ShareCode của kịch bản
+   * @return  state scenario, state serialCommands, state ShareCode
    */
   async function loadConfigById(configId: number | null, shareCode: string | null): Promise<SerialConfig | null> {
     try {
@@ -147,11 +147,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           return null;
         }
       } else {
-        url = `${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${configId}`;
+        url = `${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/${configId}`;
       }
       console.log(url);
 
-      /// Tạo request để tải cấu hình về
+      /// Tạo request để tải kịch bản về
       const res = await fetch(url, {
         headers: isGuest
           ? {}
@@ -159,8 +159,8 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       });
       /// Đợi response
       const data = await res.json() as SerialConfig;
-      if (!res.ok) throw new Error("Không tìm thấy cấu hình.");
-      /// Lưu state chứa toàn bộ cấu hình
+      if (!res.ok) throw new Error("Không tìm thấy kịch bản.");
+      /// Lưu state chứa toàn bộ kịch bản
       setConfig(data);
       // Ghi nhận vào state chứa mã chia sẻ
       if (shareCode == null) {
@@ -170,11 +170,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
         setSelectedConfigId(null);
       }
 
-      /// Cập nhật banner hiển thị thông tin hướng dẫn hoặc quảng cáo mà URL năm trong cấu hình
+      /// Cập nhật banner hiển thị thông tin hướng dẫn hoặc quảng cáo mà URL năm trong kịch bản
       if (onConfigLoaded) {
         onConfigLoaded(data);
       }
-      /// Lưu lại vào state danh sách các serial default command chứa trong cấu hình
+      /// Lưu lại vào state danh sách các serial default command chứa trong kịch bản
       const initial: { [key: number]: string } = {};
       data.components.forEach((c : SerialAction) => {
         initial[c.id] = c.defaultValue || "";
@@ -182,7 +182,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       setSerialCommands(initial);
       return data;
     } catch (err) {
-      alert("Lỗi khi tải cấu hình: " + (err instanceof Error ? err.message : String(err)));
+      alert("Lỗi khi tải kịch bản: " + (err instanceof Error ? err.message : String(err)));
       setConfig(null);
       setSerialCommands({});
       throw err;
@@ -217,7 +217,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     const text = await file.text();
     try {
       const payload = JSON.parse(text);
-      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/import`, {
+      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/import`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -238,7 +238,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
 
   const handleExport = async () => {
     if (!selectedConfigId) return;
-    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/export/${selectedConfigId}`, {
+    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/export/${selectedConfigId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -249,7 +249,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${data.name || "config"}.json`;
+    a.download = `${data.name || "scenario"}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -257,15 +257,15 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   };
 
   /**
-   * Hàm sự kiện Chia sẻ cấu hình với cộng đồng
-   * @param selectedConfigId Tham số ngầm định, là id của cấu hình dang chọn
+   * Hàm sự kiện Chia sẻ kịch bản với cộng đồng
+   * @param selectedConfigId Tham số ngầm định, là id của kịch bản dang chọn
    * @callback Nút bấm trên giao diện 
    * @returns 
    */
   const handleShare = async () => {
     if (!selectedConfigId) return;
     // Gửi yêu cầu lên server
-    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/share/${selectedConfigId}`, {
+    const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/share/${selectedConfigId}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -279,9 +279,9 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
 
   const handleDeleteConfig = async () => {
     if (!selectedConfigId) return;
-    if (!window.confirm("Bạn chắc chắn muốn xoá cấu hình này?")) return;
+    if (!window.confirm("Bạn chắc chắn muốn xoá kịch bản này?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/configs/${selectedConfigId}`, {
+      const res = await fetch(`${import.meta.env.VITE_SPECIALIZED_API_URL}/scenarios/${selectedConfigId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -292,7 +292,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       alert("Xoá thành công!");
       window.location.reload();
     } catch (err) {
-      alert("Lỗi khi xoá cấu hình: " + (err instanceof Error ? err.message : String(err)));
+      alert("Lỗi khi xoá kịch bản: " + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -307,11 +307,11 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
   };
 
   const onClickConnectToDevice = () => {
-    connectToSerial(config?.baudrate || 115200)
+    connectToSerial(scenario?.baudrate || 115200)
   };
 
   function handleInputShareCode(): void {
-      const manualShareCode : string|null = prompt("Nhập mã chia sẻ của một cấu hình nào dó bạn biết.", "");
+      const manualShareCode : string|null = prompt("Nhập mã chia sẻ của một kịch bản nào dó bạn biết.", "");
       if (manualShareCode != null) {
         // Gọi hàm ngoài update lại giao diện
         loadConfigById(null, manualShareCode);
@@ -325,13 +325,13 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           <Navbar.Brand id="sharedcode">
             <ShareCode code={shareCode} />
           </Navbar.Brand>
-            <select   title="Serial Configurations"
+            <select   title="Serial Senarios"
                       onChange={(e ) => setSelectedConfigId(e.target.value ? Number(e.target.value) : null)}
                       disabled={isGuest}
                       value={selectedConfigId || ""} 
                       className="m-auto">
-              <option value="">-- Chọn cấu hình --</option>
-              {configs.map((cfg) => (
+              <option value="">-- Chọn kịch bản --</option>
+              {scenarios.map((cfg) => (
                 <option key={cfg.id} value={cfg.id} className={cfg.isShared ? "text-danger" : "text-dark"}>
                   {cfg.name}
                 </option>
@@ -348,14 +348,14 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           <Navbar.Collapse id="basic-navbar-nav">            
             <Nav className="me-auto">
               <NavDropdown title="Kịch bản" id="basic-nav-dropdown">
-                <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i className="bi bi-code-square"></i> Nhập mã cấu hình...</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i className="bi bi-code-square"></i> Nhập mã kịch bản...</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-danger")}> <i className="bi bi-globe"></i> Chia sẻ với cộng đồng    </NavDropdown.Item>
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-dark")}> <i className="bi bi-person-lock"></i> Dừng chia sẻ (todo) </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleImport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-up"></i> Up lên file cấu hình... </NavDropdown.Item>
-                <NavDropdown.Item onClick={handleExport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-down"></i> Tải về file cấu hình </NavDropdown.Item>
-                <NavDropdown.Item onClick={handleDeleteConfig} className={isGuest ? "disabled" : ""}> <i className="bi bi-trash"></i> Xóa cấu hình hiện thời..</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleImport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-up"></i> Up lên file kịch bản... </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleExport} className={isGuest ? "disabled" : ""}> <i className="bi bi-cloud-arrow-down"></i> Tải về file kịch bản </NavDropdown.Item>
+                <NavDropdown.Item onClick={handleDeleteConfig} className={isGuest ? "disabled" : ""}> <i className="bi bi-trash"></i> Xóa kịch bản hiện thời..</NavDropdown.Item>
               </NavDropdown>
             </Nav>
           <div className="vr d-none d-lg-block"></div>            
@@ -404,13 +404,13 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
       </div>
 
 
-      {config && (
+      {scenario && (
         <>
-          <h3>{config.name}</h3>
-          <p><strong>Hệ thống:</strong> {config.description}</p>
+          <h3>{scenario.name}</h3>
+          <p><strong>Hệ thống:</strong> {scenario.description}</p>
 
           <div>
-            {config.components.map((comp : SerialAction) => (
+            {scenario.components.map((comp : SerialAction) => (
               <ComponentRenderer
                 key={comp.id}
                 component={comp}

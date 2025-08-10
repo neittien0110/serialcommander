@@ -23,12 +23,12 @@ function MainApp() {
   const [rightBanner, setRightBanner] = useState<string>("");
     
   /**
-   * Thay đổi banner theo cấu hình
-   * @param config Cấu trúc chứa cấu hình hiện thời
+   * Thay đổi banner theo kịch bản
+   * @param scenario Cấu trúc chứa kịch bản hiện thời
    */
-  const handleConfigLoaded = (config: SerialConfig) => {
-    setLeftBanner(config.leftBanner || import.meta.env.VITE_DEFAULT_LEFT_URL);
-    setRightBanner(config.rightBanner || import.meta.env.VITE_DEFAULT_RIGHT_BANNER);
+  const handleConfigLoaded = (scenario: SerialConfig) => {
+    setLeftBanner(scenario.leftBanner || import.meta.env.VITE_DEFAULT_LEFT_URL);
+    setRightBanner(scenario.rightBanner || import.meta.env.VITE_DEFAULT_RIGHT_BANNER);
   //  setShareCode("Mã chia sẻ");
   };
 

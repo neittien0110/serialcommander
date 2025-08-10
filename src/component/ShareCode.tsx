@@ -44,7 +44,7 @@ export default function ShareCode({ code }: ShareCodeProps) {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="shareModalLabel">Sử dụng cấu hình</h5>
+              <h5 className="modal-title" id="shareModalLabel">Sử dụng kịch bản</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
@@ -54,7 +54,7 @@ export default function ShareCode({ code }: ShareCodeProps) {
                 </div>
                 <div className="col-8 fs-6">
                   <p className="text-wrap">
-                    Đây là URL của cấu hình hiện thời, đã chia sẻ. Bất cứ ai biết URL này đều có thể sử dụng.
+                    Đây là URL của kịch bản hiện thời, đã chia sẻ. Bất cứ ai biết URL này đều có thể sử dụng.
                   </p>
                   
                   <div className="alert alert-info py-2 text-break fs-6 text-wrap" role="alert">

@@ -1,6 +1,6 @@
 import { SerialAction } from "./SerialAction";
 
-// Định nghĩa một interface cho cấu hình
+// Định nghĩa một interface cho kịch bản
 export interface SerialConfig {
   id: number;
   name: string;
