@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import ComponentRenderer from "../componentrenderer/ComponentRenderer";
-import { SerialContext } from "../SerialContext";
-import ShareCode from "../ShareCode/ShareCode";
+import ComponentRenderer from "./ComponentRenderer";
+import { SerialContext } from "./SerialContext";
+import ShareCode from "./ShareCode";
 import { useNavigate } from "react-router-dom";
 
 import Container from 'react-bootstrap/Container';
@@ -12,8 +12,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import SplitButton from 'react-bootstrap/SplitButton';
 
-import { SerialConfig } from '../../dto/SerialConfig';
-import { SerialAction } from "../../dto/SerialAction";
+import { SerialConfig } from '../dto/SerialConfig';
+import { SerialAction } from "../dto/SerialAction";
 
 import { useParams } from "react-router-dom";     //Lấy tham số từ URL
 
@@ -347,7 +347,7 @@ function DeviceSetting({ onConfigLoaded }: DeviceSettingProps) {
           <Navbar.Toggle aria-controls="basic-navbar-nav"  />     
           <Navbar.Collapse id="basic-navbar-nav">            
             <Nav className="me-auto">
-              <NavDropdown title="Cấu hình" id="basic-nav-dropdown">
+              <NavDropdown title="Kịch bản" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={handleInputShareCode} className="text-danger"> <i className="bi bi-code-square"></i> Nhập mã cấu hình...</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleShare} className={(isGuest ? "disabled" : "text-danger")}> <i className="bi bi-globe"></i> Chia sẻ với cộng đồng    </NavDropdown.Item>

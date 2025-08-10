@@ -1,6 +1,6 @@
 // MainApp.tsx
 import { useState } from "react";
-import DeviceSetting from "./component/DeviceSetting/DeviceSetting";
+import DeviceSetting from "./component/DeviceSetting";
 import { SerialProvider } from "./component/SerialContext";
 
 import 'bootstrap/dist/css/bootstrap.min.css';      // Áp dụng bootstrap

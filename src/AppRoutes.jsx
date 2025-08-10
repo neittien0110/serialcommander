@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./component/Login/LoginPage";
-import RegisterPage from "./component/Login/RegisterPage";
+import LoginPage from "./component/LoginPage";
+import RegisterPage from "./component/RegisterPage";
 import MainApp from "./MainApp";
 
 const AppRoutes = ({ isLoggedIn, setIsLoggedIn }) => {
